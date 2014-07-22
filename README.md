@@ -11,6 +11,8 @@ By default midje-readme will put "(:require [your-project.core :refer :all])" in
 
 When you run a leiningen command the plugin will create a file "test/readme.clj" that contains the code in your readme. Line numbers will be the same as in your readme so debugging should be pretty easy.
 
+You might want to add test/readme.clj to your .gitignore too.
+
 ## Restrictions
 
 Changes in README.md will not be picked up by "lein midje :autotest"
