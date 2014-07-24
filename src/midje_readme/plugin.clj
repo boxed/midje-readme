@@ -2,20 +2,21 @@
 
 (defn readme-to-midje-test [readme require-str]
   (let [keep-line (atom false)
-        is-code-start-stop #(or (= %1 "```") (= %1 "```clojure"))]
+        is-code-start #(= %1 "```clojure")
+        is-code-stop #(= %1 "```")]
     (clojure.string/join "\n" (assoc
-                                (into [] (filter #(not (is-code-start-stop %))
-                                                 (for [line (clojure.string/split-lines readme)]
-                                                   (if (is-code-start-stop line)
-                                                     (if @keep-line
-                                                       (do (swap! keep-line not) ")")
-                                                       (do (swap! keep-line not) "(fact")
-                                                       )
-
-                                                     (if @keep-line
-                                                       line
-                                                       "")))))
-                                0 (format "(ns readme (:use midje.sweet) (:require %s))" require-str)))))
+                                (into []
+                                      (for [line (clojure.string/split-lines readme)]
+                                         (cond
+                                          (and (is-code-start line) (not @keep-line))
+                                            (do (swap! keep-line not) "(use 'midje.sweet) (ns readme) (fact")
+                                          (and (is-code-stop line) @keep-line)
+                                            (do (swap! keep-line not) ")")
+                                          :else
+                                             (if @keep-line
+                                               line
+                                                ""))))
+                                0 (format "(ns readme (:use midje.sweet) (:require %s)) (def ... :...)" require-str)))))
 
 (defn middleware [project]
   (spit "test/readme.clj"
