@@ -2,8 +2,8 @@
 
 (defn readme-to-midje-test [readme require-str]
   (let [keep-line (atom false)
-        is-code-start #(= %1 "```clojure")
-        is-code-stop #(= %1 "```")]
+        is-code-start #(= (clojure.string/trim %1) "```clojure")
+        is-code-stop #(= (clojure.string/trim %1) "```")]
     (clojure.string/join "\n" (assoc
                                 (into []
                                       (for [line (clojure.string/split-lines readme)]
