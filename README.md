@@ -13,6 +13,12 @@ When you run a leiningen command the plugin will create a file "test/readme.clj"
 
 You might want to add test/readme.clj to your .gitignore too.
 
+You can show that your README is tested with this badge: [![Examples tested with midje-readme](http://img.shields.io/badge/readme-tested-brightgreen.svg)](https://github.com/boxed/midje-readme) Copy paste the markdown syntax below:
+
+    [![Examples tested with midje-readme](http://img.shields.io/badge/readme-tested-brightgreen.svg)](https://github.com/boxed/midje-readme)
+
+
+
 ## Restrictions
 
 Changes in README.md will not be picked up by "lein midje :autotest"
