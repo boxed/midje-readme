@@ -1,5 +1,6 @@
 (ns midje-readme.plugin
-  (:require [leiningen.core.eval :refer :all]))
+  (:require [leiningen.core.eval :refer :all]
+            [leiningen.new.templates :as templates]))
 
 (defn readme-to-midje-test [readme require-str]
   (let [keep-line (atom false)
@@ -19,6 +20,12 @@
                                                 ""))))
                                 0 (format "(ns readme (:use midje.sweet) (:require %s)) (def ... :...)" require-str)))))
 
+(defn- guess-namespace-to-use-for-require [{:keys [group name]}]
+  (templates/multi-segment
+   (if (= name group)
+     group
+     (format "%s.%s" group name))))
+
 (defn middleware [project]
   (let [used-clojure-version (read-string (with-out-str (eval-in project '(prn *clojure-version*))))]
     (if (or (> (:major used-clojure-version) 1)
@@ -26,7 +33,8 @@
       (spit "test/readme.clj"
             (readme-to-midje-test (slurp "README.md")
                                   (or (get-in project [:midje-readme :require])
-                                      (format "[%s.core :refer :all]" (:group project)))))
+                                      (format "[%s :refer :all]"
+                                              (guess-namespace-to-use-for-require project)))))
       (do
         (clojure.java.io/delete-file "test/readme.clj" true)
         (println "Warning: midje-readme doesn't support clojure < 1.4. The readme will not be tested"))))
