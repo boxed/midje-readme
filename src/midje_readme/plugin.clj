@@ -51,7 +51,7 @@
         (wt/file-filter readme?)
         (wt/on-change (fn [_] (write-readme-tests! project))))
       (do
-        (clojure.java.io/delete-file "test/readme.clj" true)
-        (println "Warning: midje-readme doesn't support clojure < 1.4. The readme will not be tested"))))
+        (io/delete-file OUTPUT_FILENAME true)
+        (warn "Warning: midje-readme doesn't support clojure < 1.4. The readme will not be tested"))))
 
   project)
