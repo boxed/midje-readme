@@ -1,5 +1,8 @@
 (ns midje-readme.plugin
-  (:require [leiningen.core.eval :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.java.io :as io]
+            [leiningen.core.main :refer [warn]]
+            [leiningen.core.eval :refer :all]
             [leiningen.new.templates :as templates]
             [watchtower.core :as wt]))
 
@@ -7,27 +10,31 @@
 
 (def OUTPUT_FILENAME "test/readme.clj")
 
+(def ^:private is-code-start? (comp #{"```clojure"} str/trim))
+
+(def ^:private is-code-stop?  (comp #{"```"} str/trim))
+
 (defn- readme? [file]
   (and (= "." (.getParent file))
        (= README_FILENAME (.getName file))))
 
+(defn- process-readme-line [keep-line line]
+  (cond
+   (and (is-code-start? line) (not keep-line))
+     [true "(use 'midje.sweet) (ns readme) (fact"]
+   (and (is-code-stop? line) keep-line)
+     [false ")"]
+   :else
+     [keep-line (if keep-line line "")]))
+
 (defn readme-to-midje-test [readme require-str]
-  (let [keep-line (atom false)
-        is-code-start #(= (clojure.string/trim %1) "```clojure")
-        is-code-stop #(= (clojure.string/trim %1) "```")]
-    (clojure.string/join "\n" (assoc
-                                (into []
-                                      (for [line (clojure.string/split-lines readme)]
-                                         (cond
-                                          (and (is-code-start line) (not @keep-line))
-                                            (do (swap! keep-line not) "(use 'midje.sweet) (ns readme) (fact")
-                                          (and (is-code-stop line) @keep-line)
-                                            (do (swap! keep-line not) ")")
-                                          :else
-                                             (if @keep-line
-                                               line
-                                                ""))))
-                                0 (format "(ns readme (:use midje.sweet) (:require %s)) (def ... :...)" require-str)))))
+  (let [acc   [(format "(ns readme (:use midje.sweet) (:require %s)) (def ... :...)" require-str)]
+        lines (rest (str/split-lines readme))]
+    (str/join "\n" (loop [acc acc, keep-line false, [line & rest] lines]
+                     (if-not line
+                       acc
+                       (let [[keep-line output] (process-readme-line keep-line line)]
+                         (recur (conj acc output) keep-line rest)))))))
 
 (defn- guess-namespace-to-use-for-require [{:keys [group name]}]
   (templates/multi-segment
