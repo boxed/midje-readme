@@ -1,6 +1,15 @@
 (ns midje-readme.plugin
   (:require [leiningen.core.eval :refer :all]
-            [leiningen.new.templates :as templates]))
+            [leiningen.new.templates :as templates]
+            [watchtower.core :as wt]))
+
+(def README_FILENAME "README.md")
+
+(def OUTPUT_FILENAME "test/readme.clj")
+
+(defn- readme? [file]
+  (and (= "." (.getParent file))
+       (= README_FILENAME (.getName file))))
 
 (defn readme-to-midje-test [readme require-str]
   (let [keep-line (atom false)
@@ -26,15 +35,21 @@
      group
      (format "%s.%s" group name))))
 
+(defn write-readme-tests! [project]
+  (spit OUTPUT_FILENAME
+        (readme-to-midje-test (slurp README_FILENAME)
+                              (or (get-in project [:midje-readme :require])
+                                  (format "[%s :refer :all]"
+                                          (guess-namespace-to-use-for-require project))))))
+
 (defn middleware [project]
   (let [used-clojure-version (read-string (with-out-str (eval-in project '(prn *clojure-version*))))]
     (if (or (> (:major used-clojure-version) 1)
             (> (:minor used-clojure-version) 3))
-      (spit "test/readme.clj"
-            (readme-to-midje-test (slurp "README.md")
-                                  (or (get-in project [:midje-readme :require])
-                                      (format "[%s :refer :all]"
-                                              (guess-namespace-to-use-for-require project)))))
+      (wt/watcher ["."]
+        (wt/rate 100)
+        (wt/file-filter readme?)
+        (wt/on-change (fn [_] (write-readme-tests! project))))
       (do
         (clojure.java.io/delete-file "test/readme.clj" true)
         (println "Warning: midje-readme doesn't support clojure < 1.4. The readme will not be tested"))))

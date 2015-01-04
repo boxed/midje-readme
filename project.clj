@@ -9,4 +9,5 @@
         :url "https://github.com/boxed/midje-readme"}
   :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store"]
   :eval-in-leiningen true
-  :profiles {:dev {:dependencies [[midje "1.6.3"]]}})
+  :profiles {:dev {:dependencies [[midje "1.6.3"]
+                                  [watchtower "0.1.1"]]}})
