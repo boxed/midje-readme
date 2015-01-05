@@ -1,4 +1,4 @@
-(defproject midje-readme "1.0.5"
+(defproject midje-readme "1.0.6-SNAPSHOT"
   :description "A Leiningen plugin to pull tests from your README.md into midje."
   :url "https://github.com/boxed/midje-readme"
   :license {:name "Eclipse Public License"
