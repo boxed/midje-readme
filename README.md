@@ -2,9 +2,13 @@
 
 A Leiningen plugin to pull tests from your README.md into midje automatically. This will make it easy to make sure your readme doesn't contain any errors.
 
+## Latest version
+
+[![Clojars Project](http://clojars.org/midje-readme/latest-version.svg)](http://clojars.org/midje-readme)
+
 ## Usage
 
-Put `[midje-readme "1.0.4"]` into the `:plugins` vector of your project.clj.
+Put `[midje-readme "1.0.5"]` into the `:plugins` vector of your project.clj.
 
 By default midje-readme will put
 
