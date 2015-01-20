@@ -8,7 +8,7 @@ A Leiningen plugin to pull tests from your README.md into midje automatically. T
 
 ## Usage
 
-Put `[midje-readme "1.0.5"]` into the `:plugins` vector of your project.clj.
+Put `[midje-readme "1.0.6"]` into the `:plugins` vector of your project.clj.
 
 By default midje-readme will put
 
