@@ -9,6 +9,6 @@
         :url "https://github.com/boxed/midje-readme"}
   :deploy-repositories [["releases" :clojars]]
   :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store"]
+  :dependencies [[watchtower "0.1.1"]]
   :eval-in-leiningen true
-  :profiles {:dev {:dependencies [[midje "1.6.3"]
-                                  [watchtower "0.1.1"]]}})
+  :profiles {:dev {:dependencies [[midje "1.6.3"]]}})
