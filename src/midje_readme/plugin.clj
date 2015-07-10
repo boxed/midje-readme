@@ -27,8 +27,12 @@
    :else
      [keep-line (if keep-line line "")]))
 
-(defn- readme-to-midje-test [readme require-str]
-  (let [acc   [(format "(ns readme (:use midje.sweet) (:require %s)) (def ... :...)" require-str)]
+(defn- readme-to-midje-test [readme require-str refer-clojure-str]
+  (let [acc   [(format "(ns readme (:use midje.sweet) (:require %s) %s) (def ... :...)"
+                       require-str
+                       (if refer-clojure-str
+                         (format "(:refer-clojure %s)" refer-clojure-str)
+                         ""))]
         lines (rest (str/split-lines readme))]
     (str/join "\n" (loop [acc acc, keep-line false, [line & rest] lines]
                      (if-not line
@@ -47,7 +51,8 @@
         (readme-to-midje-test (slurp README_FILENAME)
                               (or (get-in project [:midje-readme :require])
                                   (format "[%s :refer :all]"
-                                          (guess-namespace-to-use-for-require project))))))
+                                          (guess-namespace-to-use-for-require project)))
+                              (get-in project [:midje-readme :refer-clojure]))))
 
 (defn- keep-writing-tests!
   [project]
