@@ -4,7 +4,9 @@
             [leiningen.core.main :refer [warn]]
             [leiningen.core.eval :refer :all]
             [leiningen.new.templates :as templates]
-            [watchtower.core :as wt]))
+            [watchtower.core :as wt])
+  (:import (java.io ByteArrayOutputStream PrintStream FileDescriptor
+                    FileOutputStream)))
 
 (def README_FILENAME "README.md")
 
@@ -67,8 +69,24 @@
   (io/delete-file OUTPUT_FILENAME true)
   (warn "Warning: midje-readme doesn't support clojure < 1.4. The readme will not be tested"))
 
+;; Taken from https://github.com/technomancy/leiningen/blob/master/test/leiningen/test/helper.clj
+;; See https://github.com/technomancy/leiningen/commit/c35a1de4f0b45365a97e6e54c1eba309b45b7f46
+(defmacro with-system-out-str
+  "Like with-out-str, but for System/out."
+  [& body]
+  `(try (let [o# (ByteArrayOutputStream.)]
+          (System/setOut (PrintStream. o#))
+          ~@body
+          (.toString o#))
+        (finally
+          (System/setOut
+           (-> FileDescriptor/out FileOutputStream. PrintStream.)))))
+
 (defn middleware [project]
-  (let [used-clojure-version (read-string (with-out-str (eval-in project '(prn *clojure-version*))))]
+  (let [used-clojure-version (read-string
+                              (with-system-out-str
+                                (eval-in project
+                                         '(prn *clojure-version*))))]
     (if (or (> (:major used-clojure-version) 1)
             (> (:minor used-clojure-version) 3))
       (keep-writing-tests! project)
